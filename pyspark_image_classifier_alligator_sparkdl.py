@@ -11,7 +11,7 @@
 #
 #   Usage:
 '''
-/usr/hdp/current/spark2-client/bin/pyspark                                     \
+/usr/hdp/current/spark2-client/bin/spark-submit                                     \
     --master yarn                                                                   \
     --deploy-mode client                                                            \
     --driver-memory 10G                                                             \
@@ -37,8 +37,8 @@ from sparkdl import readImages
 
 spark = SparkSession.builder.appName('alligator_training').getOrCreate()
 
-img_alligator_df = readImages("/tmp/images_alligators").withColumn("label", lit(1)).where(col("image").isNotNull())
-img_other_df     = readImages("/tmp/images_other").withColumn("label", lit(0)).where(col("image").isNotNull())
+img_alligator_df = readImages("/tmp/modeling/training/alligator").withColumn("label", lit(1)).where(col("image").isNotNull())
+img_other_df     = readImages("/tmp/modeling/training/not_alligator").withColumn("label", lit(0)).where(col("image").isNotNull())
 
 #img_other_df.withColumn('uid',monotonically_increasing_id()).filter('uid < 10').count()
 
@@ -52,10 +52,10 @@ alligator_train, alligator_test  = img_alligator_df.randomSplit([training_pct, t
 other_train,     other_test      = img_other_df.randomSplit([training_pct, testing_pct])
 
 train_df = alligator_train.unionAll(other_train)
-print('[ INFO ] Number of Training Records: ' + str(train_df.count()))
+#print('[ INFO ] Number of Training Records: ' + str(train_df.count()))
 
 test_df = alligator_test.unionAll(other_test)
-print('[ INFO ] Number of Training Records: ' + str(test_df.count()))
+#print('[ INFO ] Number of Training Records: ' + str(test_df.count()))
 
 featurizer = DeepImageFeaturizer(inputCol="image", outputCol="features", modelName="InceptionV3")
 lr = LogisticRegression(maxIter=20, regParam=0.05, elasticNetParam=0.3, labelCol="label")
@@ -68,14 +68,13 @@ pipe_model = pipe.fit(train_df)
 
 predictions = pipe_model.transform(test_df)
 
-print('[ INFO ] Printing filepath and predictions (1=alligator)...')
-predictions.select("filePath", "prediction").show(150,False)
+#print('[ INFO ] Printing filepath and predictions (1=alligator)...')
+#predictions.select("filePath", "prediction").show(150,False)
 
 predictionAndLabels = predictions.select("prediction", "label")
 evaluator = MulticlassClassificationEvaluator(metricName="accuracy")
 print('[ INFO ] Training set accuracy = ' + str(evaluator.evaluate(predictionAndLabels)))
 
-print('[ COMPLETE ]')
 
 
 #ZEND
