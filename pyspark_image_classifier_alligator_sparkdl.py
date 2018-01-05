@@ -44,7 +44,7 @@ img_other_df     = readImages("/tmp/modeling/training/not_alligator").withColumn
 
 #img_other_df.show()
 
-# Testing and Train Split (I'm using 40/60 because I was running out of memory when doing a higher training pct)
+# Testing and Train Split (I'm using low 30/70 split because I was running out of memory in my dev environment when doing a higher training pct)
 training_pct = 0.30
 testing_pct  = 0.70
 
