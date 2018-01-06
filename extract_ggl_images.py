@@ -1,4 +1,6 @@
 
+# JavaScript to Save URLs
+'''
 // This script can be used to extract images from GGL. 
 // Execute within browser console. 
 // Steps:
@@ -20,3 +22,17 @@ hiddenElement.click();
 
 // Reference: https://www.pyimagesearch.com/2017/12/04/how-to-create-a-deep-learning-dataset-using-google-images/
 // ZEND
+'''
+
+import requests
+
+file = '/Users/dzaratsian/Downloads/urls.txt'
+urls = open(file,'rb').read().split('\n')
+
+for url in urls:
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        filename = url.split('/')[-1]
+        open(filename, 'wb').write(r.content)
+
+#ZEND
