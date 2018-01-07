@@ -1,13 +1,11 @@
 
 ############################################################################################################
 #
-#   Image classifiation based on trained ML model (tensorflow + spark) 
+#   Spark Deep Learning - Image classifiation (tensorflow + spark) 
 #
-#   This approach does not use a pre-trained model, but requires that the ML classification algorithm is 
-#   trained against a set of known alligator images (plus random images for testing purposes)
+#   This script uses Spark DL transfer learning plus a Spark ML algorigthm to classify images
 #
 #   Accuracy: 0.948717948718 
-#
 #
 #   Usage:
 '''
@@ -41,10 +39,9 @@ img_alligator_df = readImages("/tmp/modeling/training/alligator").withColumn("la
 img_other_df     = readImages("/tmp/modeling/training/not_alligator").withColumn("label", lit(0)).where(col("image").isNotNull())
 
 #img_other_df.withColumn('uid',monotonically_increasing_id()).filter('uid < 10').count()
-
 #img_other_df.show()
 
-# Testing and Train Split (I'm using low 30/70 split because I was running out of memory in my dev environment when doing a higher training pct)
+# Testing and Train Split (I'm using 40/60 because I was running out of memory when doing a higher training pct)
 training_pct = 0.30
 testing_pct  = 0.70
 
@@ -52,10 +49,10 @@ alligator_train, alligator_test  = img_alligator_df.randomSplit([training_pct, t
 other_train,     other_test      = img_other_df.randomSplit([training_pct, testing_pct])
 
 train_df = alligator_train.unionAll(other_train)
-#print('[ INFO ] Number of Training Records: ' + str(train_df.count()))
+print('[ INFO ] Number of Training Records: ' + str(train_df.count()))
 
 test_df = alligator_test.unionAll(other_test)
-#print('[ INFO ] Number of Training Records: ' + str(test_df.count()))
+print('[ INFO ] Number of Training Records: ' + str(test_df.count()))
 
 featurizer = DeepImageFeaturizer(inputCol="image", outputCol="features", modelName="InceptionV3")
 lr = LogisticRegression(maxIter=20, regParam=0.05, elasticNetParam=0.3, labelCol="label")
@@ -76,6 +73,4 @@ evaluator = MulticlassClassificationEvaluator(metricName="accuracy")
 print('[ INFO ] Training set accuracy = ' + str(evaluator.evaluate(predictionAndLabels)))
 
 
-
 #ZEND
-
