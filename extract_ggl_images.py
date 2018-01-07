@@ -32,9 +32,12 @@ urls = open(file,'rb').read().split('\n')
 for url in urls:
     r = requests.get(url, stream=True)
     if r.status_code == 200:
-        filename = url.split('/')[-1]
-        # Write to working directory
-        open(filename, 'wb').write(r.content)
-        print('[ INFO ] Saved ' + str(filename))
+        try:
+            filename = url.split('/')[-1]
+            # Write to working directory
+            open(filename, 'wb').write(r.content)
+            print('[ INFO ] Saved ' + str(filename))
+        except:
+            print('[ WARNING ] Not saved: ' + str(filename))
 
 #ZEND
