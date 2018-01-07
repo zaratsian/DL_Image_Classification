@@ -26,7 +26,7 @@ pip install tensorflow
     --num-executors 3                                                               \
     --packages databricks:spark-deep-learning:0.2.0-spark2.1-s_2.11                 \
     --conf "spark.pyspark.python=/opt/anaconda2/bin/python"                         \
-    pyspark_image_classifier_alligator_inception.py                                 \
+    pyspark_image_classifier_inception.py                                           \
     /tmp/images_alligators                                                          \
     alligator
 '''
