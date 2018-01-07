@@ -7,4 +7,4 @@ Deep Learning Image Classification - Scripts and Links
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;<a href="https://elitedatascience.com/keras-tutorial-deep-learning-in-python">Keras Overview</a>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;<a href="https://thenewstack.io/tips-tricks-develop-deep-learning-using-apache-spark/">Deep Learning with Spark Considerations</a>
 <br>
-<br><img src="screenshots/image_classification_results.png" class="inline"/>
+<br><img src="screenshots/image_classification_results1.png" class="inline"/>
