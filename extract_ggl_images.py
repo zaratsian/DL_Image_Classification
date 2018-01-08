@@ -24,20 +24,55 @@ hiddenElement.click();
 // ZEND
 '''
 
-import requests
 
-file = '/Users/dzaratsian/Downloads/urls.txt'
-urls = open(file,'rb').read().split('\n')
 
-for url in urls:
-    r = requests.get(url, stream=True)
-    if r.status_code == 200:
+def download_images(file='/Users/dzaratsian/Downloads/urls_stuffed_animals.txt'):
+    import requests
+    from PIL import Image
+    from resizeimage import resizeimage
+
+    urls = open(file,'rb').read().split('\n')
+    
+    for url in urls:
         try:
-            filename = url.split('/')[-1]
-            # Write to working directory
-            open(filename, 'wb').write(r.content)
-            print('[ INFO ] Saved ' + str(filename))
+            r = requests.get(url, stream=True)
+            if r.status_code == 200:
+                filename = url.split('/')[-1]            
+                if filename.split('.')[-1].lower() in ['jpg','jpeg','png']:
+                    # Write to working directory
+                    cover = resizeimage.resize_thumbnail(r.content, [200, 100])
+                    cover.save('test-image-cover.jpeg', r.content.format)
+                    #open(filename, 'wb').write(r.content)
+                    print('[ INFO ] Saved ' + str(filename))
+                else:
+                    print('[ WARNING ] Not saved: ' + str(filename))
         except:
-            print('[ WARNING ] Not saved: ' + str(filename))
+            print('[ WARNING ] Passed on ' + str(url))
+
+
+
+def create_thumbnails_from_current_dir():
+    import os
+    from PIL import Image
+    from resizeimage import resizeimage
+    
+    images_path = [(image, os.getcwd() + '/' + str(image)) for image in os.listdir('.') if image.split('.')[-1].lower() in ['jpg','jpeg','png']]
+    
+    os.makedirs(os.getcwd() + '/thumbnails')
+    
+    for filename, image_path in images_path:
+        
+        with open(image_path, 'rb') as f:
+            try:
+                with Image.open(f) as image:
+                    #cover = resizeimage.resize_cover(image, [200, 200])
+                    cover = resizeimage.resize_thumbnail(image, [200, 200])
+                    #cover  = resizeimage.resize_thumbnail(image, [200, 200])
+                    cover.save('thumbnails/thumbnail' + str(filename), image.format)
+                    print('[ INFO ] Saved ' + 'thumbnails/thumbnail' + str(filename))
+            except:
+                print('[ WARNING ] Passed on ' + str(image_path))
+
+
 
 #ZEND
