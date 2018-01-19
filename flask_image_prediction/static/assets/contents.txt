@@ -1,0 +1,4 @@
+-rw-r--r--@  1 dzaratsian  staff       248 Jan 19 08:46 class_indices.npy
+-rw-r--r--@  1 dzaratsian  staff  51409248 Jan 19 08:46 elephant_model.h5
+-rw-r--r--@  1 dzaratsian  staff  58921328 Jan 19 08:46 vgg16_model.h5
+-rw-r--r--@  1 dzaratsian  staff  25708176 Jan 19 08:46 weights.h5

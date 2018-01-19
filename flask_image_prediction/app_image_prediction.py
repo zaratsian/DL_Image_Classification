@@ -58,7 +58,7 @@ app.secret_key = os.urandom(24)
 image_directory     = os.getcwd()+'/static/model_images'
 #model_vgg16        = applications.VGG16(include_top=False, weights='imagenet')
 model_vgg16         = load_model(os.getcwd()+'/static/assets/vgg16_model.h5')
-model_weights_path  = os.getcwd()+'/static/assets/alligator_weights.h5'
+model_weights_path  = os.getcwd()+'/static/assets/weights.h5'
 class_dictionary    = np.load(os.getcwd()+'/static/assets/class_indices.npy').item()
 index_number        = 0
 
@@ -127,11 +127,11 @@ def predict_from_image_path(image_path, model_vgg16, model_weights_path, class_d
     
     inv_map = {v: k for k, v in class_dictionary.items()}
     
-    prediction_prob = round(probabilities[0][0], 8)
-    #prediction     = inv_map[inID]
-    prediction      = 'Alligator' if prediction_prob >= .8 else 'No Alligator'
+    prediction_prob = round(probabilities[0][inID], 8)
+    prediction     = inv_map[inID]
+    #prediction      = 'Alligator' if prediction_prob >= .8 else 'No Alligator'
     
-    return prediction, float(prediction_prob)
+    return prediction.upper(), float(prediction_prob)*100
 
 
 def predict_from_base64_image(image_base64_encoded, model_vgg16, model_weights_path, class_dictionary):
@@ -185,11 +185,11 @@ def predict_from_base64_image(image_base64_encoded, model_vgg16, model_weights_p
     
     inv_map = {v: k for k, v in class_dictionary.items()}
     
-    prediction_prob = round(probabilities[0][0], 8)
-    #prediction     = inv_map[inID]
-    prediction      = 'Alligator' if prediction_prob >= .8 else 'No Alligator'
+    prediction_prob = round(probabilities[0][inID], 8)
+    prediction     = inv_map[inID]
+    #prediction      = 'Alligator' if prediction_prob >= .8 else 'No Alligator'
     
-    return prediction, float(prediction_prob)
+    return prediction.upper(), float(prediction_prob)*100
 
 
 ###################################################################################################
