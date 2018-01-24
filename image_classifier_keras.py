@@ -1,7 +1,7 @@
 
 ##############################################################################################################
 #
-#   Keras - Image Classification (multi-class)
+#   Keras - Image Classification
 #   https://keras.io/
 #
 ##############################################################################################################
@@ -36,16 +36,16 @@ from keras.models import load_model
 #import cv2 #pip install opencv-python
 
 
-
+        
 img_width, img_height   = 224, 224
 top_model_path          = os.getcwd() + '/elephant_model.h5'
 top_model_weights_path  = os.getcwd() + '/elephant_weights.h5'
 class_indices_path      = os.getcwd() + '/elephant_class_indices.npy'
-bottleneck_training     = os.getcwd() + 'bottleneck_features_training.npy'
-bottleneck_validation   = os.getcwd() + 'bottleneck_features_validation.npy'
+bottleneck_training     = os.getcwd() + '/bottleneck_features_training.npy'
+bottleneck_validation   = os.getcwd() + '/bottleneck_features_validation.npy'
 train_data_dir          = os.getcwd() + '/training'
 validation_data_dir     = os.getcwd() + '/validation'
-epochs                  = 40
+epochs                  = 50
 
 
 
@@ -161,7 +161,8 @@ def train_top_model():
     model.add(Flatten(input_shape=train_data.shape[1:]))
     model.add(Dense(256, activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(num_classes, activation='sigmoid'))
+    #model.add(Dense(num_classes, activation='sigmoid'))
+    model.add(Dense(num_classes, activation='softmax'))
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
     
     print('[ INFO ] Fitting CNN...')
@@ -181,8 +182,51 @@ def train_top_model():
     print('[INFO] Loss: ' + str(eval_loss))
 
 
+save_bottleneck_features()
+train_top_model()
 
-def predict(image_path='/tmp/modeling/validation/alligator/alligator5501.jpeg'):
+
+
+
+
+
+
+##############################################################################################################
+#
+#   Keras - Image Classification
+#
+#   https://keras.io/
+#   https://blog.keras.io/building-powerful-image-classification-models-using-very-little-data.html
+#   http://www.codesofinterest.com/2017/08/bottleneck-features-multi-class-classification-keras.html
+#   https://www.pyimagesearch.com/2017/12/11/image-classification-with-keras-and-deep-learning/
+#   https://elitedatascience.com/keras-tutorial-deep-learning-in-python
+#   https://www.pyimagesearch.com/2017/12/18/keras-deep-learning-raspberry-pi/
+#
+#   Usage: python pyspark_image_classifier_hadoop_keras.py <image_path>
+#
+##############################################################################################################
+
+import os, sys
+import numpy as np
+from keras.preprocessing.image import ImageDataGenerator, img_to_array, load_img
+from keras.models import Sequential
+from keras.layers import Dropout, Flatten, Dense
+from keras import applications
+
+img_width, img_height   = 224, 224
+top_model_path          = os.getcwd() + '/elephant_model.h5'
+top_model_weights_path  = os.getcwd() + '/weights.h5'
+class_indices_path      = os.getcwd() + '/class_indices.npy'
+train_data_dir          = os.getcwd() + '/training'
+validation_data_dir     = os.getcwd() + '/validation'
+
+try:
+    image_path = sys.argv[1]
+except:
+    print '[ ERROR ] Usage: python pyspark_image_classifier_hadoop_keras.py <image_path>'
+    sys.exit()
+
+def keras_classify_image(image_path='/Users/dzaratsian/Desktop/image_classification/images/alligator/alligator_203.jpeg'):
     # load the class_indices saved in the earlier step
     class_dictionary = np.load(class_indices_path).item()
     
@@ -191,34 +235,30 @@ def predict(image_path='/tmp/modeling/validation/alligator/alligator5501.jpeg'):
     # add the path to your test image below
     image_path = image_path
     
-    orig = cv2.imread(image_path)
+    #orig = cv2.imread(image_path)
     
     print("[INFO] loading and preprocessing image...")
-    image = load_img(image_path, target_size=(224, 224))
+    image = load_img(image_path, target_size=(img_width, img_height))
     image = img_to_array(image)
-    
-    # important! otherwise the predictions will be '0'
+    # Important! otherwise the predictions will be '0'
     image = image / 255
-    
     image = np.expand_dims(image, axis=0)
     
-    # build the VGG16 network
+    # Build the VGG16 network
     model = applications.VGG16(include_top=False, weights='imagenet')
     
     # get the bottleneck prediction from the pre-trained VGG16 model
     bottleneck_prediction = model.predict(image)
     
-    # build top model
+    # Build top model
     model = Sequential()
     model.add(Flatten(input_shape=bottleneck_prediction.shape[1:]))
     model.add(Dense(256, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(num_classes, activation='sigmoid'))
-    
     model.load_weights(top_model_weights_path)
     
-    # use the bottleneck prediction on the top model to get the final
-    # classification
+    # Use the bottleneck prediction on the top model to get the final classification
     class_predicted = model.predict_classes(bottleneck_prediction)
     
     probabilities = model.predict_proba(bottleneck_prediction)
@@ -227,10 +267,12 @@ def predict(image_path='/tmp/modeling/validation/alligator/alligator5501.jpeg'):
     
     inv_map = {v: k for k, v in class_dictionary.items()}
     
-    label = inv_map[inID]
+    label       = inv_map[inID]
+    label_prob  = probabilities[0][inID] * 100
     
-    # get the prediction label
-    print("Image ID: {}, Label: {}".format(inID, label))
+    predictions = {}
+    for i,prob in enumerate(probabilities[0]):
+        predictions[inv_map[i]] = prob
     
     # Display the predictions with the image
     #cv2.putText(orig, "Predicted: {}".format(label), (10, 30),
@@ -239,13 +281,13 @@ def predict(image_path='/tmp/modeling/validation/alligator/alligator5501.jpeg'):
     #cv2.imshow("Classification", orig)
     #cv2.waitKey(0)
     #cv2.destroyAllWindows()
+    
+    # Output results
+    print("[ PREDICTION ] " + str(label.upper()) + ' (Prob: ' + str(label_prob) + ')')
+    return predictions
 
 
-
-save_bottleneck_features()
-train_top_model()
-
-#predict()
+keras_classify_image(image_path)
 #cv2.destroyAllWindows()
 
 
@@ -255,6 +297,7 @@ train_top_model()
 #   https://www.pyimagesearch.com/2017/12/11/image-classification-with-keras-and-deep-learning/
 #   https://elitedatascience.com/keras-tutorial-deep-learning-in-python
 #   https://www.pyimagesearch.com/2017/12/18/keras-deep-learning-raspberry-pi/
+
 
 #ZEND
 
