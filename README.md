@@ -1,5 +1,5 @@
-<h3>Image Classification</h3>
-Deep Learning Image Classification - Scripts and Links
+<h3>Deep Learning Image Classification</h3>
+Projects, Scripts, and Links
 <br>
 <br>
 <br><b>To Run WebApp:</b>
