@@ -10,7 +10,7 @@ FROM centos
 
 ARG JAVA_VER=java-1.8.0-openjdk-devel
 
-ARG ANACONDA_URL=https://repo.continuum.io/archive/Anaconda2-5.0.0.1-Linux-x86_64.sh
+ARG ANACONDA_URL=https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 
 ARG SPARK_URL=https://archive.apache.org/dist/spark/spark-2.2.0/spark-2.2.0-bin-hadoop2.7.tgz
 ARG SPARK_VER=spark-2.2.0-bin-hadoop2.7
@@ -24,16 +24,21 @@ ARG ZEPPELIN_VER=zeppelin-0.7.3-bin-all
 #
 ######################################################################################################
 
-RUN yum install -y ${JAVA_VER}
-RUN echo "export JAVA_HOME=/usr/lib/jvm/java" >> /root/.bashrc
-
-RUN yum install -y epel-release
-RUN yum update -y
-
-RUN yum install -y wget
-RUN yum install -y unzip
-RUN yum install -y net-tools
-RUN yum install -y git
+RUN yum install -y ${JAVA_VER} && \
+    echo "export JAVA_HOME=/usr/lib/jvm/java" >> /root/.bashrc && \
+    yum update -y && \
+    yum install -y wget unzip net-tools git && \
+    yum -y install bzip2 && \
+    echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
+    wget --quiet ${ANACONDA_URL} -O ~/anaconda.sh && \
+    /bin/bash ~/anaconda.sh -b -p /opt/conda && \
+    rm ~/anaconda.sh && \
+    /opt/conda/bin/pip install numpy && \
+    /opt/conda/bin/conda install -c conda-forge tensorflow -y && \
+    /opt/conda/bin/pip install keras && \
+    /opt/conda/bin/pip install flask && \
+    /opt/conda/bin/pip install pillow && \
+    /opt/conda/bin/pip install scipy --upgrade
 
 ######################################################################################################
 #
@@ -41,10 +46,10 @@ RUN yum install -y git
 #
 ######################################################################################################
 
-RUN wget ${SPARK_URL} -O /spark.tgz
-RUN tar -xzvf spark.tgz
-RUN mv ${SPARK_VER} /spark
-RUN rm /spark.tgz
+#RUN wget ${SPARK_URL} -O /spark.tgz
+#RUN tar -xzvf spark.tgz
+#RUN mv ${SPARK_VER} /spark
+#RUN rm /spark.tgz
 
 ######################################################################################################
 #
@@ -52,30 +57,11 @@ RUN rm /spark.tgz
 #
 ######################################################################################################
 
-RUN wget ${ZEPPELIN_URL} -O /zeppelin.tgz
-RUN tar -xzvf zeppelin.tgz
-RUN mv ${ZEPPELIN_VER} /zeppelin
-RUN echo "export SPARK_HOME=/spark" >> /zeppelin/conf/zeppelin-env.sh
-RUN rm /zeppelin.tgz
-
-######################################################################################################
-#
-#   Install Anaconda
-#
-######################################################################################################
-
-RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-RUN python get-pip.py
-RUN rm get-pip.py
-RUN yum -y install bzip2
-RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
-    wget --quiet ${ANACONDA_URL} -O ~/anaconda.sh && \
-    /bin/bash ~/anaconda.sh -b -p /opt/conda && \
-    rm ~/anaconda.sh
-
-RUN opt/conda/bin/pip install keras
-RUN opt/conda/bin/pip install tensorflow
-RUN opt/conda/bin/pip install scipy --upgrade
+#RUN wget ${ZEPPELIN_URL} -O /zeppelin.tgz
+#RUN tar -xzvf zeppelin.tgz
+#RUN mv ${ZEPPELIN_VER} /zeppelin
+#RUN echo "export SPARK_HOME=/spark" >> /zeppelin/conf/zeppelin-env.sh
+#RUN rm /zeppelin.tgz
 
 ######################################################################################################
 #
