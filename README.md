@@ -4,7 +4,7 @@ Projects, Scripts, and Links
 <br>
 <br><b>To Run WebApp:</b>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;1) Clone Repo
-<br>&nbsp;&nbsp;&nbsp;&nbsp;2) <code>cd image_classification/docker</code>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;2) <code>cd DL_Image_Classification/docker</code>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;3) <code>./build.sh</code>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;4) <code>./run_image_classification.sh</code>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;5) Open up browser and go to http://localhost:14444
